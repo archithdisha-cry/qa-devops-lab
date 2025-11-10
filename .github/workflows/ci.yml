@@ -1,0 +1,29 @@
+name: CI/CD QA DevOps Lab
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t qa-devops-lab .
+
+      - name: Run Postman tests
+        run: |
+          npm install -g newman
+          newman run tests/postman/collection.json
+
+      - name: Run Cypress tests
+        uses: cypress-io/github-action@v6
+        with:
+          start: npm start
+          wait-on: 'http://localhost:3000'
+          browser: chrome
