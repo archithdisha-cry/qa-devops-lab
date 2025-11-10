@@ -9,5 +9,6 @@
   },
   "devDependencies": {
     "cypress": "^13.6.1"
+    "start-server-and-test": "^2.0.0"
   }
 }
