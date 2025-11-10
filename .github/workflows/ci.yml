@@ -6,27 +6,37 @@ on:
   pull_request:
 
 jobs:
-  test:
+  api-tests:
+    name: Run Postman tests
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
         with:
           node-version: '18'
+      - run: npm install
+      - run: |
+          nohup npm start &
+          echo "Waiting for server..."
+          for i in {1..30}; do
+            nc -z localhost 3000 && echo "Server up!" && break
+            sleep 2
+          done
+      - run: |
+          npm install -g newman
+          newman run tests/postman/collection.json
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Install Cypress
-        run: npm install cypress --save-dev
-
-      # ✅ Cypress starts the app once and waits for it to be ready
-      - name: Run Cypress tests
-        id: cypress
+  ui-tests:
+    name: Run Cypress tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - run: npm install
+      - run: npm install cypress --save-dev
+      - name: Run Cypress
         uses: cypress-io/github-action@v6
         with:
           start: npm start
@@ -34,11 +44,3 @@ jobs:
           wait-on-timeout: 120
           browser: chrome
           spec: tests/cypress/e2e/**/*.cy.js
-          # keep the server running for Newman
-          wait-on-force: true
-
-      # ✅ Newman now runs against that same running app — no new server start
-      - name: Run Postman tests
-        run: |
-          npm install -g newman
-          newman run tests/postman/collection.json
