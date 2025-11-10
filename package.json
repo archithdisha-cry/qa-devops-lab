@@ -4,11 +4,7 @@
   "description": "A simple Node.js app for QA DevOps pipeline practice",
   "scripts": {
     "start": "node app.js",
-
-    // 👇 this runs your Newman Postman tests directly
     "test:postman": "newman run tests/postman/collection.json --env-var baseUrl=http://localhost:3000",
-
-    // 👇 this is the important one — it starts your app, waits for it, then runs Newman tests
     "test:postman:ci": "start-server-and-test start http://localhost:3000 \"npm run test:postman\""
   },
   "dependencies": {
