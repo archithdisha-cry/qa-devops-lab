@@ -1,0 +1,10 @@
+{
+  "name": "qa-devops-lab",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo 'run tests here'"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
