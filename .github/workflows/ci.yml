@@ -13,6 +13,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
       - name: Build Docker image
         run: docker build -t qa-devops-lab .
 
@@ -20,12 +25,20 @@ jobs:
         run: |
           npm install
           nohup npm start &
-          sleep 15
+          echo "Waiting for server to start..."
+          for i in {1..30}; do
+            nc -z localhost 3000 && echo "✅ Server is up!" && break
+            echo "⏳ Still waiting for server..."
+            sleep 2
+          done
 
       - name: Run Postman tests
         run: |
           npm install -g newman
           newman run tests/postman/collection.json
+
+      - name: Install Cypress
+        run: npm install cypress --save-dev
 
       - name: Run Cypress tests
         uses: cypress-io/github-action@v6
