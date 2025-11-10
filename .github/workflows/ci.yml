@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -18,28 +18,13 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Build Docker image
-        run: docker build -t qa-devops-lab .
-
-      - name: Start app in background
-        run: |
-          npm install
-          nohup npm start &
-          echo "Waiting for server to start..."
-          for i in {1..30}; do
-            nc -z localhost 3000 && echo "✅ Server is up!" && break
-            echo "⏳ Still waiting for server..."
-            sleep 2
-          done
-
-      - name: Run Postman tests
-        run: |
-          npm install -g newman
-          newman run tests/postman/collection.json
+      - name: Install dependencies
+        run: npm install
 
       - name: Install Cypress
         run: npm install cypress --save-dev
 
+      # 🧪 Run Cypress — it will start the app and wait for it to be ready
       - name: Run Cypress tests
         uses: cypress-io/github-action@v6
         with:
@@ -47,3 +32,10 @@ jobs:
           wait-on: 'http://localhost:3000'
           wait-on-timeout: 120
           browser: chrome
+          spec: tests/cypress/e2e/**/*.cy.js
+
+      # 🧪 Run Postman tests AFTER Cypress confirms app is live
+      - name: Run Postman tests
+        run: |
+          npm install -g newman
+          newman run tests/postman/collection.json
