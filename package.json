@@ -2,9 +2,12 @@
   "name": "qa-devops-lab",
   "scripts": {
     "start": "node app.js",
-    "test": "echo 'run tests here'"
+    "test": "npx cypress run"
   },
   "dependencies": {
     "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "cypress": "^13.6.1"
   }
 }
