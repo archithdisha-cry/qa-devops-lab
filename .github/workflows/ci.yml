@@ -8,6 +8,7 @@ on:
 jobs:
   full-test:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
@@ -17,34 +18,14 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Start server for API tests (port 3000)
-        run: |
-          PORT=3000 nohup npm start > server.log 2>&1 &
-          for i in {1..30}; do
-            if nc -z localhost 3000; then echo "✅ Server 3000 ready"; break; fi
-            echo "waiting..."; sleep 2;
-          done
-          tail -n 20 server.log
-
-      - name: Run Postman tests
-        run: |
-          npm install -g newman
-          newman run tests/postman/collection.json --env-var baseUrl=http://localhost:3000
-
-      - name: Kill server on port 3000
-        run: kill $(lsof -t -i:3000) || true
-
-      - name: Start server for Cypress tests (port 3001)
-        run: |
-          PORT=3001 nohup npm start > server.log 2>&1 &
-          for i in {1..30}; do
-            if nc -z localhost 3001; then echo "✅ Server 3001 ready"; break; fi
-            echo "waiting..."; sleep 2;
-          done
-          tail -n 20 server.log
-
-      - name: Install Cypress
-        run: npm install cypress --save-dev
+      - name: Run Postman tests with server startup
+        run: npm run test:postman:ci
 
       - name: Run Cypress tests
-        run: npx cypress run --config baseUrl=http://localhost:3001 --browser chrome
+        uses: cypress-io/github-action@v6
+        with:
+          start: npm start
+          wait-on: 'http://localhost:3000'
+          wait-on-timeout: 120
+          browser: chrome
+          spec: tests/cypress/e2e/**/*.cy.js
