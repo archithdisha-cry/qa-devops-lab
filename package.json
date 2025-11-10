@@ -1,6 +1,18 @@
-"scripts": {
-  "start": "node app.js",
-  "start:api": "PORT=3001 node app.js",
-  "test:postman": "newman run tests/postman/collection.json --env-var baseUrl=http://localhost:3001",
-  "test:postman:ci": "start-server-and-test start:api http://localhost:3001 \"npm run test:postman\""
+{
+  "name": "qa-devops-lab",
+  "version": "1.0.0",
+  "description": "A simple Node.js app for QA DevOps pipeline practice",
+  "scripts": {
+    "start": "node app.js",
+    "start:api": "PORT=3001 node app.js",
+    "test:postman": "newman run tests/postman/collection.json --env-var baseUrl=http://localhost:3001",
+    "test:postman:ci": "start-server-and-test start:api http://localhost:3001 \"npm run test:postman\""
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "cypress": "^13.6.1",
+    "start-server-and-test": "^2.0.0"
+  }
 }
