@@ -10,30 +10,33 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Pull your code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2️⃣ Set up Node
       - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
           node-version: '18'
 
-      # 3️⃣ Install all dependencies (Express, Cypress, Newman, start-server-and-test, etc.)
       - name: Install dependencies
         run: npm install
 
-      # 4️⃣ Run Postman (API) tests with automatic server startup
+      # --- Run Postman tests (API, port 3001) ---
       - name: Run Postman tests
         run: npm run test:postman:ci
 
-      # 5️⃣ Run Cypress (UI) tests — Cypress handles its own server wait logic
+      # --- Kill leftover processes on port 3000 or 3001 ---
+      - name: Cleanup any running servers
+        run: |
+          echo "Cleaning up any old Node processes..."
+          kill $(lsof -t -i:3000 -i:3001) 2>/dev/null || true
+
+      # --- Run Cypress (UI, port 3002) ---
       - name: Run Cypress tests
         uses: cypress-io/github-action@v6
         with:
-          start: npm start
-          wait-on: 'http://localhost:3000'
+          start: PORT=3002 npm start
+          wait-on: 'http://localhost:3002'
           wait-on-timeout: 120
           browser: chrome
           spec: tests/cypress/e2e/**/*.cy.js
