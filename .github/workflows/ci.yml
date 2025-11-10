@@ -24,8 +24,9 @@ jobs:
       - name: Install Cypress
         run: npm install cypress --save-dev
 
-      # 🧪 Run Cypress — it will start the app and wait for it to be ready
+      # ✅ Cypress starts the app once and waits for it to be ready
       - name: Run Cypress tests
+        id: cypress
         uses: cypress-io/github-action@v6
         with:
           start: npm start
@@ -33,8 +34,10 @@ jobs:
           wait-on-timeout: 120
           browser: chrome
           spec: tests/cypress/e2e/**/*.cy.js
+          # keep the server running for Newman
+          wait-on-force: true
 
-      # 🧪 Run Postman tests AFTER Cypress confirms app is live
+      # ✅ Newman now runs against that same running app — no new server start
       - name: Run Postman tests
         run: |
           npm install -g newman
