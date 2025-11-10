@@ -15,16 +15,20 @@ jobs:
         with:
           node-version: '18'
       - run: npm install
-      - run: |
-          nohup npm start &
-          echo "Waiting for server..."
+
+      - name: Start app on port 3000 for API tests
+        run: |
+          PORT=3000 nohup npm start &
+          echo "Waiting for API server..."
           for i in {1..30}; do
-            nc -z localhost 3000 && echo "Server up!" && break
+            nc -z localhost 3000 && echo "Server up on port 3000!" && break
             sleep 2
           done
-      - run: |
+
+      - name: Run Postman tests
+        run: |
           npm install -g newman
-          newman run tests/postman/collection.json
+          newman run tests/postman/collection.json --env-var baseUrl=http://localhost:3000
 
   ui-tests:
     name: Run Cypress tests
@@ -36,11 +40,12 @@ jobs:
           node-version: '18'
       - run: npm install
       - run: npm install cypress --save-dev
-      - name: Run Cypress
+
+      - name: Run Cypress on port 3001
         uses: cypress-io/github-action@v6
         with:
-          start: npm start
-          wait-on: 'http://localhost:3000'
+          start: PORT=3001 npm start
+          wait-on: 'http://localhost:3001'
           wait-on-timeout: 120
           browser: chrome
           spec: tests/cypress/e2e/**/*.cy.js
